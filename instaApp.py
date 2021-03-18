@@ -160,7 +160,7 @@ class App(tk.Tk):
 
         sum_s = 0
         sum_e = 0
-        num = 0
+        # num = 0
         num_sub = 0
 
         if self.isElementExist(path_but_subscribe):
@@ -181,7 +181,7 @@ class App(tk.Tk):
                 # 所有的关注按钮
                 eles_but_subscribe = self.driver.find_elements_by_xpath(path_but_subscribe)
                 for ele_like_but in eles_but_subscribe:
-                    num += 1
+                    # num += 1
                     if ele_like_but.text == '关注' or ele_like_but.text == 'Follow':
                         num_sub += 1
                         if not ele_like_but.is_displayed():
@@ -190,34 +190,38 @@ class App(tk.Tk):
                         sleep(2)
                         ele_like_but.click()
                         path_err = "/html/body/div[6]/div/div/div/div[1]/h3"
+                        # TODO：如果有稍后再试的提示，关闭弹窗，sleep 30分钟后继续
                         if self.isElementExist(path_err):
-                            ele_msg_box = self.driver.find_element_by_xpath(path_err).text
-                            if ele_msg_box == '稍后重试':
-                                self.out_log('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
-                                self.show_msg('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
-                                return
-                            else:
-                                self.out_log('关注第 {} 个用户时，遇到未知错误，请稍后再试。'.format(num_sub))
-                                self.show_msg('关注第 {} 个用户时，遇到未知错误，请稍后再试。'.format(num_sub))
-                                return
-                        num_sub += 1
+                            # ele_msg_box = self.driver.find_element_by_xpath(path_err).text
+                            # if ele_msg_box == '稍后重试':
+                            self.out_log('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
+                            self.show_msg('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
+                            return
                         self.out_log('已关注 {} 个用户'.format(num_sub))
                         self.out_log('等待5-10s，再关注下一个用户')
                         sleep(random.randint(5, 10))
-                self.out_log('操作完成，共对 {} 个用户点击关注'.format(num_sub))
-                self.show_msg('操作完成，共对 {} 个用户点击关注'.format(num_sub))
 
                 eles_but_subscribe = self.driver.find_elements_by_xpath(path_but_subscribe)
                 sum_e = len(eles_but_subscribe)
-                for ele_like_but in eles_but_subscribe:
-                    if ele_like_but.text == '关注' or ele_like_but.text == 'Follow':
-                        num += 1
+
+                # 没有加载出更多粉丝后，重复10次尝试加载
+                i = 0
+                for i in range(10):
+                    i += 1
+                    if sum_e != sum_s:
+                        break
+                    self.driver.execute_script(js)
+                    self.out_log('加载粉丝列表下一页数据。。。')
+                    sleep(10)
+
+                    eles_but_subscribe = self.driver.find_elements_by_xpath(path_but_subscribe)
+                    sum_e = len(eles_but_subscribe)
+
                 if sum_e == sum_s:
                     self.out_log('已经加载该账号的所有 {} 个粉丝'.format(sum_e))
                     break
                 sum_s = sum_e
                 sleep(1)
-            sleep(1)
         else:
             self.out_log('该用户下没有粉丝！')
             self.show_msg('该用户下没有粉丝。')
