@@ -37,7 +37,7 @@ class App(tk.Tk):
         self.but_stop_browser.grid(column=0, row=2, padx=10)
         self.but_subscribe.grid(column=0, row=1, padx=10)
         self.but_end_script.grid(column=0, row=3, padx=10)
-        self.text_log.grid(column=1, row=0, rowspan=4)
+        # self.text_log.grid(column=1, row=0, rowspan=4)
 
     # def get_opt(self):
     #     opt = self.combox.get()
@@ -45,7 +45,7 @@ class App(tk.Tk):
 
     # def print_user(self):
     #     uname, pwd = self.get_user()
-    #     self.out_log(uname, pwd)
+    #     print(uname, pwd)
 
     # def get_user(self):
     #     uname = self.username_mine.get()
@@ -72,8 +72,8 @@ class App(tk.Tk):
             flag = False
             return flag
         except RecursionError:
-            # self.out_log('请先点击“打开浏览器”按钮')
-            self.out_log('请先点击“打开浏览器”按钮')
+            # print('请先点击“打开浏览器”按钮')
+            print('请先点击“打开浏览器”按钮')
             return
 
     def open_browser(self):
@@ -100,16 +100,16 @@ class App(tk.Tk):
             chrome_options.add_experimental_option("prefs", prefs)
 
             self.driver = webdriver.Chrome(chrome_options=chrome_options)
-            self.out_log("打开浏览器")
+            print("打开浏览器")
             self.driver.get(base_url)
-            self.out_log("访问Instagram")
+            print("访问Instagram")
             # self.driver.maximize_window()
-            # self.out_log("浏览器全屏")
+            # print("浏览器全屏")
             self.driver.implicitly_wait(10)
 
             sleep(1)
         except Exception as e:
-            self.out_log('访问Instagram登录页面失败：{}'.format(e))
+            print('访问Instagram登录页面失败：{}'.format(e))
             self.driver.quit()
             self.show_msg('访问Instagram登录页面失败，请检查网络连接后重试。{}'.format(e))
             return
@@ -118,7 +118,7 @@ class App(tk.Tk):
         try:
             self.driver.quit()
         except RecursionError:
-            self.out_log('没有实例化的浏览器，请先点击“打开浏览器”按钮')
+            print('没有实例化的浏览器，请先点击“打开浏览器”按钮')
             self.show_msg("没有实例化的浏览器，请先点击“打开浏览器”按钮")
 
     def end_script(self):
@@ -134,7 +134,7 @@ class App(tk.Tk):
         try:
             self.driver
         except RecursionError:
-            self.out_log("没有实例化的浏览器，请先点击“打开浏览器”按钮")
+            print("没有实例化的浏览器，请先点击“打开浏览器”按钮")
             self.show_msg('没有实例化的浏览器，请先点击“打开浏览器”按钮')
             return
         if self.isElementExist(path_fans_list):
@@ -143,17 +143,17 @@ class App(tk.Tk):
                 ele_fans_list.click()
             except ElementClickInterceptedException:
                 if self.isElementExist(path_but_subscribe):
-                    self.out_log('粉丝列表已打开')
+                    print('粉丝列表已打开')
                 else:
-                    self.out_log('当前页面未找到粉丝列表。1')
+                    print('当前页面未找到粉丝列表。1')
                     # self.driver.quit()
                     self.show_msg('当前页面未找到粉丝列表。')
                     return
             else:
-                self.out_log('打开粉丝列表')
+                print('打开粉丝列表')
                 sleep(2)
         else:
-            self.out_log('当前页面未找到粉丝列表。2')
+            print('当前页面未找到粉丝列表。2')
             # self.driver.quit()
             self.show_msg('当前页面未找到粉丝列表。')
             return
@@ -169,12 +169,12 @@ class App(tk.Tk):
             while True:
                 try:
                     # div的滚动条操作
-                    js = "document.getElementsByClassName('isgrP')[0].scrollTop=10000"
+                    js = "document.getElementsByClassName('isgrP')[0].scrollTop=10000000"
                     self.driver.execute_script(js)
-                    self.out_log('加载粉丝列表下一页数据。。。')
+                    print('加载粉丝列表下一页数据。。。')
                     sleep(2)
                 except Exception as e:
-                    self.out_log('加载下一页数据异常！{}'.format(e))
+                    print('加载下一页数据异常！{}'.format(e))
                     # self.driver.quit()
                     self.show_msg('加载粉丝列表下一页数据异常！{}'.format(e))
                     return
@@ -194,36 +194,36 @@ class App(tk.Tk):
                         if self.isElementExist(path_err):
                             # ele_msg_box = self.driver.find_element_by_xpath(path_err).text
                             # if ele_msg_box == '稍后重试':
-                            self.out_log('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
+                            print('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
                             self.show_msg('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
                             return
-                        self.out_log('已关注 {} 个用户'.format(num_sub))
-                        self.out_log('等待5-10s，再关注下一个用户')
+                        print('已关注 {} 个用户'.format(num_sub))
+                        print('等待5-10s，再关注下一个用户')
                         sleep(random.randint(5, 10))
 
                 eles_but_subscribe = self.driver.find_elements_by_xpath(path_but_subscribe)
                 sum_e = len(eles_but_subscribe)
 
-                # 没有加载出更多粉丝后，重复10次尝试加载
-                i = 0
-                for i in range(10):
-                    i += 1
-                    if sum_e != sum_s:
-                        break
-                    self.driver.execute_script(js)
-                    self.out_log('加载粉丝列表下一页数据。。。')
-                    sleep(10)
-
-                    eles_but_subscribe = self.driver.find_elements_by_xpath(path_but_subscribe)
-                    sum_e = len(eles_but_subscribe)
-
-                if sum_e == sum_s:
-                    self.out_log('已经加载该账号的所有 {} 个粉丝'.format(sum_e))
-                    break
-                sum_s = sum_e
+                # # 没有加载出更多粉丝后，重复10次尝试加载
+                # i = 0
+                # for i in range(10):
+                #     i += 1
+                #     if sum_e != sum_s:
+                #         break
+                #     self.driver.execute_script(js)
+                #     print('加载粉丝列表下一页数据。。。')
+                #     sleep(10)
+                #
+                #     eles_but_subscribe = self.driver.find_elements_by_xpath(path_but_subscribe)
+                #     sum_e = len(eles_but_subscribe)
+                #
+                # if sum_e == sum_s:
+                #     print('已经加载该账号的所有 {} 个粉丝'.format(sum_e))
+                #     break
+                # sum_s = sum_e
                 sleep(1)
         else:
-            self.out_log('该用户下没有粉丝！')
+            print('该用户下没有粉丝！')
             self.show_msg('该用户下没有粉丝。')
             return
 
