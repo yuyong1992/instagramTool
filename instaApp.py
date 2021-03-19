@@ -8,6 +8,7 @@ from time import sleep
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException
 import sys
 import random
+import time
 
 
 class App(tk.Tk):
@@ -73,7 +74,7 @@ class App(tk.Tk):
             return flag
         except RecursionError:
             # print('请先点击“打开浏览器”按钮')
-            print('请先点击“打开浏览器”按钮')
+            print('{} -- 请先点击“打开浏览器”按钮'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) ))
             return
 
     def open_browser(self):
@@ -100,16 +101,16 @@ class App(tk.Tk):
             chrome_options.add_experimental_option("prefs", prefs)
 
             self.driver = webdriver.Chrome(chrome_options=chrome_options)
-            print("打开浏览器")
+            print("{} -- 打开浏览器".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
             self.driver.get(base_url)
-            print("访问Instagram")
+            print("{} -- 访问Instagram".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) ))
             # self.driver.maximize_window()
             # print("浏览器全屏")
             self.driver.implicitly_wait(10)
 
             sleep(1)
         except Exception as e:
-            print('访问Instagram登录页面失败：{}'.format(e))
+            print('{} -- 访问Instagram登录页面失败：{}'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), e))
             self.driver.quit()
             self.show_msg('访问Instagram登录页面失败，请检查网络连接后重试。{}'.format(e))
             return
@@ -118,7 +119,7 @@ class App(tk.Tk):
         try:
             self.driver.quit()
         except RecursionError:
-            print('没有实例化的浏览器，请先点击“打开浏览器”按钮')
+            print('{} -- 没有实例化的浏览器，请先点击“打开浏览器”按钮'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
             self.show_msg("没有实例化的浏览器，请先点击“打开浏览器”按钮")
 
     def end_script(self):
@@ -134,7 +135,7 @@ class App(tk.Tk):
         try:
             self.driver
         except RecursionError:
-            print("没有实例化的浏览器，请先点击“打开浏览器”按钮")
+            print("{} -- 没有实例化的浏览器，请先点击“打开浏览器”按钮".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
             self.show_msg('没有实例化的浏览器，请先点击“打开浏览器”按钮')
             return
         if self.isElementExist(path_fans_list):
@@ -143,17 +144,17 @@ class App(tk.Tk):
                 ele_fans_list.click()
             except ElementClickInterceptedException:
                 if self.isElementExist(path_but_subscribe):
-                    print('粉丝列表已打开')
+                    print('{} -- 粉丝列表已打开'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                 else:
-                    print('当前页面未找到粉丝列表。1')
+                    print('{} -- 当前页面未找到粉丝列表。'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                     # self.driver.quit()
                     self.show_msg('当前页面未找到粉丝列表。')
                     return
             else:
-                print('打开粉丝列表')
+                print('{} -- 打开粉丝列表'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                 sleep(2)
         else:
-            print('当前页面未找到粉丝列表。2')
+            print('{} -- 当前页面未找到粉丝列表。'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
             # self.driver.quit()
             self.show_msg('当前页面未找到粉丝列表。')
             return
@@ -171,10 +172,10 @@ class App(tk.Tk):
                     # div的滚动条操作
                     js = "document.getElementsByClassName('isgrP')[0].scrollTop=10000000"
                     self.driver.execute_script(js)
-                    print('加载粉丝列表下一页数据。。。')
+                    print('{} -- 加载粉丝列表下一页数据。。。'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                     sleep(2)
                 except Exception as e:
-                    print('加载下一页数据异常！{}'.format(e))
+                    print('{} -- 加载下一页数据异常！{}'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), e))
                     # self.driver.quit()
                     self.show_msg('加载粉丝列表下一页数据异常！{}'.format(e))
                     return
@@ -194,12 +195,12 @@ class App(tk.Tk):
                         if self.isElementExist(path_err):
                             # ele_msg_box = self.driver.find_element_by_xpath(path_err).text
                             # if ele_msg_box == '稍后重试':
-                            print('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
+                            print('{} -- 关注第 {} 个用户时，账号被限制，请明天再试。'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), num_sub))
                             self.show_msg('关注第 {} 个用户时，账号被限制，请明天再试。'.format(num_sub))
                             return
-                        print('已关注 {} 个用户'.format(num_sub))
-                        print('等待5-10s，再关注下一个用户')
-                        sleep(random.randint(5, 10))
+                        print('{} -- 已关注 {} 个用户'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), num_sub))
+                        print('{} -- 等待10-20s，再关注下一个用户'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                        sleep(random.randint(10, 20))
 
                 eles_but_subscribe = self.driver.find_elements_by_xpath(path_but_subscribe)
                 sum_e = len(eles_but_subscribe)
@@ -223,7 +224,7 @@ class App(tk.Tk):
                 # sum_s = sum_e
                 sleep(1)
         else:
-            print('该用户下没有粉丝！')
+            print('{} -- 该用户下没有粉丝！'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
             self.show_msg('该用户下没有粉丝。')
             return
 
