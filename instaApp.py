@@ -9,6 +9,12 @@ from selenium.common.exceptions import NoSuchElementException, ElementClickInter
 import sys
 import random
 import time
+# 引入by方法
+from selenium.webdriver.common.by import By
+# 引入鼠标事件
+from selenium.webdriver.common.action_chains import ActionChains
+# 引入键盘事件
+from selenium.webdriver.common.keys import Keys
 
 
 class App(tk.Tk):
@@ -17,6 +23,10 @@ class App(tk.Tk):
         self.window.grid()
 
     def ini_window(self):
+        user1 = 'inspiration.drone'
+        pwd1 = 'Hsnjhmx0'
+        user2 = 'yuyong1992'
+        pwd2 = 'yuyong12345'
 
         # 元素的文本样式
         font = ('Microsoft YaHei', 12)
@@ -30,14 +40,20 @@ class App(tk.Tk):
         self.but_end_script = tk.Button(self.window, text='退出', command=self.end_script, font=font)
         # 点击关注
         self.but_subscribe = tk.Button(self.window, text='关注', command=self.subscribe_user, font=font)
-        # 日志输出框
-        self.text_log = tk.Text(self.window, font=font, height=10)
+        # # 日志输出框
+        # self.text_log = tk.Text(self.window, font=font, height=10)
+        # 登录语录账号
+        self.but_login_quota =tk.Button(self.window, text='登录语录', command=lambda :self.login_insta(user1, pwd1), font=font)
+        # 点赞
+        self.but_like = tk.Button(self.window, text='点赞', command=self.like_post, font=font)
 
         # 元素布局
-        self.but_open_browser.grid(column=0, row=0, padx=10)
-        self.but_stop_browser.grid(column=0, row=2, padx=10)
-        self.but_subscribe.grid(column=0, row=1, padx=10)
-        self.but_end_script.grid(column=0, row=3, padx=10)
+        self.but_open_browser.grid(column=0, row=0, pady=4)
+        self.but_login_quota.grid(column=0, row=1, ipadx=8, pady=4)
+        self.but_subscribe.grid(column=0, row=2, ipadx=24, pady=4, padx=4)
+        self.but_like.grid(column=1, row=2, ipadx=24, pady=4, padx=4)
+        self.but_stop_browser.grid(column=0, row=3, pady=4)
+        self.but_end_script.grid(column=0, row=4, ipadx=24, pady=4)
         # self.text_log.grid(column=1, row=0, rowspan=4)
 
     # def get_opt(self):
@@ -52,6 +68,9 @@ class App(tk.Tk):
     #     uname = self.username_mine.get()
     #     pwd = self.pwd_mine.get()
     #     return uname, pwd
+
+    def now(self):
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     def out_log(self, log):
         log = '*** {} \n'.format(log)
@@ -126,6 +145,72 @@ class App(tk.Tk):
         # 退出脚本执行
         sys.exit()
 
+    def login_insta(self, username, password):
+        # url_insta = r'http://www.instagram.com'
+        # try:
+        #     self.driver.get(url_insta)
+        # except RecursionError:
+        #     print('{} -- 没有实例化的浏览器，请先点击“打开浏览器”按钮'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+        #     self.show_msg('没有实例化的浏览器，请先点击“打开浏览器”按钮')
+        #     return
+        # print('{} -- 访问Instagram'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+        # sleep(2)
+        self.open_browser()
+
+        path_mail = '//*[@id="loginForm"]/div/div[1]/div/label/input'
+        path_pwd = '//*[@id="loginForm"]/div/div[2]/div/label/input'
+        path_login_but = '//*[@id="loginForm"]/div/div[3]/button'
+        try:
+            ele_username = self.driver.find_element_by_xpath(path_mail)
+            ele_pwd = self.driver.find_element_by_xpath(path_pwd)
+            ele_login_but = self.driver.find_element_by_xpath(path_login_but)
+        except NoSuchElementException as e:
+            print('{} -- 登录页面元素定位失败。{}'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), e))
+            self.show_msg('登录页面元素定位失败，请检查网络连接后重试。{}'.format(e))
+            return
+
+        # 登录
+        ele_username.clear()
+        ele_username.send_keys(username)
+        print('{} -- 输入用户名'.format(self.now()))
+
+        ele_pwd.clear()
+        ele_pwd.send_keys(password)
+        print('{} -- 输入密码'.format(self.now()))
+
+        ele_login_but.click()
+        print('{} -- 点击登录按钮'.format(self.now()))
+        # sleep(2)
+
+        # 登录之后会出现询问是否保存登录信息的页面
+        path_save_login = '//*[@id="react-root"]/section/main/div/div/div/section/div/button'
+        # 处理询问是否保存登录信息的页面
+        if self.isElementExist(path_save_login):
+            ele_save_login = self.driver.find_element_by_xpath(path_save_login)
+            # 保存登录信息
+            ele_save_login.click()
+            print('{} -- 是否保存登录信息：是'.format(self.now()))
+
+        # sleep(2)
+
+        path_personal = '//*[@id="react-root"]/section/nav/div[2]/div/div/div[3]/div/div[5]/span/img'
+        if self.isElementExist(path_personal):
+            print('{} -- {} 已经登录成功'.format(self.now(), username))
+        else:
+            print('{} -- 未进入首页!未找到元素{}'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), path_personal))
+            self.show_msg('未进入首页!未找到元素{}，请重新运行脚本。'.format(path_personal))
+            return
+
+        # 登录之后询问是否开启消息通知，此处选择“下次再说”
+        path_handle_notice = '/html/body/div[4]/div/div/div/div[3]/button[2]'
+        # path_handle_notice = '//button[@class="aOOlW   HoLwm "]'
+        path_notice_window = "//div[@class='piCib']"
+        if self.isElementExist(path_notice_window):
+            ele_handle_notice = self.driver.find_element_by_xpath(path_handle_notice)
+            # 点击下次再选
+            ele_handle_notice.click()
+            print('{} -- 通知设置：下次再选'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+
     def subscribe_user(self):
         # 打开粉丝列表
         path_fans_list = '/html/body/div[1]/section/main/div/header/section/ul/li[2]/a'
@@ -187,6 +272,7 @@ class App(tk.Tk):
                         num_sub += 1
                         if not ele_like_but.is_displayed():
                             ele_like_but.location_once_scrolled_into_view
+                            sleep(2)
                             self.driver.execute_script("arguments[0].scrollIntoView();", ele_like_but)
                         sleep(2)
                         ele_like_but.click()
@@ -222,11 +308,61 @@ class App(tk.Tk):
                 #     print('已经加载该账号的所有 {} 个粉丝'.format(sum_e))
                 #     break
                 # sum_s = sum_e
-                sleep(1)
+                sleep(10)
         else:
             print('{} -- 该用户下没有粉丝！'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
             self.show_msg('该用户下没有粉丝。')
             return
+
+    def like_post(self):
+        # 找到帖子的列表
+        try:
+            self.driver
+        except RecursionError:
+            print("{} -- 没有实例化的浏览器，请先点击“打开浏览器”按钮".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+            self.show_msg('没有实例化的浏览器，请先点击“打开浏览器”按钮')
+            return
+
+        if not self.isElementExist('//div[@class="_9AhH0"]'):
+            print('{} -- 当前页面没有帖子，定位到有帖子的页面后再点击“点赞按钮”'.format(self.now()))
+            return
+
+        sum_s = 0
+        sum_e = 0
+        # num = 0
+        num_post = 0
+        num_like = 0
+        while True:
+            ele_posts = self.driver.find_elements_by_class_name('_9AhH0')
+            sum_s = len(ele_posts)
+            # 模拟鼠标按下空格键再松开
+            action = ActionChains(self.driver)
+            action.key_down(Keys.SPACE).perform()
+            action.key_up(Keys.SPACE).perform()
+            print('{} -- 加载下一页帖子。。。'.format(self.now()))
+            for ele_post in ele_posts:
+                num_post += 1
+                ele_post.location_once_scrolled_into_view
+                sleep(1)
+                self.driver.execute_script("arguments[0].scrollIntoView();", ele_post)
+                # 打开帖子
+                ele_post.click()
+                print('{} -- 打开第 {} 个帖子'.format(self.now(), num_post))
+                sleep(2)
+                # 点赞按钮
+                # path_but_like = '/html/body/div[5]/div[2]/div/article/div[3]/section[1]/span[1]/button/div/span/svg'
+                path_but_like = '//div[@class="QBdPU "]'
+
+                but_like = self.driver.find_elements_by_xpath(path_but_like)[1]
+                if '"赞"' in but_like.get_attribute('innerHTML'):
+                    num_like += 1
+                    but_like.click()
+                    print('{} -- 第 {} 次点赞'.format(self.now(), num_like))
+
+                # 关闭帖子
+                path_but_close = '/html/body/div[5]/div[3]/button'
+                self.driver.find_element_by_xpath(path_but_close).click()
+                print('{} -- 关闭第 {} 个帖子'.format(self.now(), num_post))
 
 
 if __name__ == '__main__':
