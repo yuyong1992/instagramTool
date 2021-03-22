@@ -353,12 +353,15 @@ class App(tk.Tk):
                 # path_but_like = '/html/body/div[5]/div[2]/div/article/div[3]/section[1]/span[1]/button/div/span/svg'
                 path_but_like = '//div[@class="QBdPU "]'
 
-                but_like = self.driver.find_elements_by_xpath(path_but_like)[1]
-                if ('"赞"' or 'Like') in but_like.get_attribute('innerHTML'):
-                    num_like += 1
-                    but_like.click()
-                    print('{} -- 第 {} 次点赞'.format(self.now(), num_like))
-
+                try:
+                    but_like = self.driver.find_elements_by_xpath(path_but_like)[1]
+                except NoSuchElementException:
+                    print('{} -- 未能加载出帖子的内容，没有定位到点赞按钮'.format(self.now()))
+                else:
+                    if ('"赞"' or 'Like') in but_like.get_attribute('innerHTML'):
+                        num_like += 1
+                        but_like.click()
+                        print('{} -- 第 {} 次点赞'.format(self.now(), num_like))
                 # 关闭帖子
                 path_but_close = '/html/body/div[5]/div[3]/button'
                 self.driver.find_element_by_xpath(path_but_close).click()
