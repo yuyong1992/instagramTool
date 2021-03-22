@@ -354,7 +354,7 @@ class App(tk.Tk):
                 path_but_like = '//div[@class="QBdPU "]'
 
                 but_like = self.driver.find_elements_by_xpath(path_but_like)[1]
-                if '"赞"' in but_like.get_attribute('innerHTML'):
+                if ('"赞"' or 'Like') in but_like.get_attribute('innerHTML'):
                     num_like += 1
                     but_like.click()
                     print('{} -- 第 {} 次点赞'.format(self.now(), num_like))
